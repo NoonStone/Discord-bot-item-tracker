@@ -4,5 +4,5 @@ Put separate executable from alternative source next to the start-bot.bat/.sh fi
 
 Then run LaunchWindows or LaunchLinux for easy startup (hopefully)
 
-if not dependensies are:
+if not dependencies are:
 Bun, Node.js, dotenv, discord.js

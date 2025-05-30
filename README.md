@@ -1,15 +1,8 @@
-# discord-custom-bot
+Add tokens and id to .env
 
-To install dependencies:
+Put separate executable from alternative source next to the start-bot.bat/.sh files
 
-```bash
-bun install
-```
+Then run LaunchWindows or LaunchLinux for easy startup (hopefully)
 
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.14. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+if not dependensies are:
+Bun, Node.js, dotenv, discord.js

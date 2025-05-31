@@ -38,7 +38,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     let logSummary = `${player} Logged:\n`;
     
     //List of materials available for adding into csv list. Needs to match exactly option.setName in commands.ts
-    const materials = ['diamond', 'gold', 'iron', 'redstone', 'lapis', 'coal'];
+    const materials = ['diamond', 'gold', 'iron', 'redstone', 'lapis', 'coal', 'copper', 'emeralds', 'swords', 'sets', 'xp'];
     
     //writes out the materials based on the materials list
     for (const material of materials) {

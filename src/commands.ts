@@ -39,6 +39,31 @@ const commands = [
           .setDescription('Amount')
           .setAutocomplete(true)
           )
+          .addStringOption(option =>
+          option.setName('copper')
+          .setDescription('Amount')
+          .setAutocomplete(true)
+          )
+          .addStringOption(option =>
+          option.setName('emeralds')
+          .setDescription('Amount')
+          .setAutocomplete(true)
+          )
+          .addStringOption(option =>
+          option.setName('swords')
+          .setDescription('Amount')
+          .setAutocomplete(true)
+          )
+          .addStringOption(option =>
+          option.setName('sets')
+          .setDescription('Amount')
+          .setAutocomplete(true)
+          )
+          .addStringOption(option =>
+          option.setName('xp')
+          .setDescription('Amount')
+          .setAutocomplete(true)
+          )
         .toJSON(),
 ];
 

@@ -2,6 +2,8 @@ import {Client, Events, GatewayIntentBits} from 'discord.js';
 import * as fs from 'fs';
 import 'dotenv/config';
 import {getMaterialList} from './lib/materials.ts';
+import { exec } from "child_process";
+import { command } from './lib/transferConfig.ts';
 
 const client = new Client({
 	intents: [
@@ -23,6 +25,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 		const player = interaction.user.username;
 		const materialList: string[] = getMaterialList();
+		
 		let printLogSummary = `${player} logged:\n`;
 
 		// Create csv file and header if missing
@@ -42,6 +45,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 		// Writes the discord confirmation message into the chat where the slash command was put into
 		await interaction.reply({content: printLogSummary});
+
+		exec(command.transferFileCommand,(error, stdout) => {
+			if (error) {
+				console.error("Upload failed", error.message);
+			}
+			console.log("Upload complete", stdout);
+		});
 	}
 });
 

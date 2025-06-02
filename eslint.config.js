@@ -10,8 +10,8 @@ export default defineConfig([
 	{
 		rules: {
 			"indent": ["error", "tab"],
-			"spaced-comment": ["error", "always", {"exceptions": ["-", "+"]}]
-
+			"spaced-comment": ["error", "always", {"exceptions": ["-", "+"]}],
+			"semi": ["error", "always"]
 		}
 	},
 	tseslint.configs.recommended,

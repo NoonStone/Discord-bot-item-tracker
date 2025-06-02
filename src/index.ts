@@ -66,20 +66,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		const multiArraySplit: string[][] = singleArraySplit.map(line => line.split(','));
 
 		// Searches through the first arrays, then through each string in the sub-array. 
-		// Untill it finds an entry that = the search input (in this case "id" but can be any string.)
+		// Until it finds an entry that = the search input (in this case "id" but can be any string.)
 		for (const searchArray of multiArraySplit) {
-			for (const searchInput of searchArray){
-				if (searchInput === id) {
-					const foundArray = multiArraySplit.indexOf(searchArray);
-					multiArraySplit[foundArray] = [''];
+			const lineId = searchArray[4];
+			if (lineId === id) {
+				const foundArray = multiArraySplit.indexOf(searchArray);
+				multiArraySplit[foundArray] = [''];
 
-					interaction.reply({content: `Removing log: \`${id}\``});
+				interaction.reply({content: `Removing log: \`${id}\``});
 					
-					// Turns the string back into a multidimensional array. Then overwrites the log file with the new one.
-					const joinedArray: string = multiArraySplit.map(row => row.join(',')).join('\n');
-					fs.writeFileSync('log.csv', joinedArray);
-					console.log('File overwritten');
-				}
+				// Turns the string back into a multidimensional array. Then overwrites the log file with the new one.
+				const joinedArray: string = multiArraySplit.map(row => row.join(',')).join('\n');
+				fs.writeFileSync('log.csv', joinedArray);
+				console.log('File overwritten');
 			}
 		}
 		transferFileRemote();

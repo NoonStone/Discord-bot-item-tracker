@@ -65,11 +65,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		const singleArraySplit = data.split('\n');
 		const multiArraySplit: string[][] = singleArraySplit.map(line => line.split(','));
 
+		let isIdFound = false;
+
 		// Searches through the first arrays, then through each string in the sub-array. 
 		// Until it finds an entry that = the search input (in this case "id" but can be any string.)
 		for (const searchArray of multiArraySplit) {
 			const lineId = searchArray[4];
 			if (lineId === id) {
+				isIdFound = true;
 				const foundArray = multiArraySplit.indexOf(searchArray);
 				multiArraySplit[foundArray] = [''];
 
@@ -81,6 +84,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 				console.log('File overwritten');
 			}
 		}
+		if (!isIdFound) {
+			interaction.reply({content: `ID \`${id}\` does not exist :/`});
+		}
+
 		transferFileRemote();
 	}
 });

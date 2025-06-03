@@ -74,7 +74,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			if (lineId === id) {
 				isIdFound = true;
 				const foundArray = multiArraySplit.indexOf(searchArray);
-				multiArraySplit[foundArray] = [''];
+				 multiArraySplit.splice(foundArray, 1);
 
 				interaction.reply({content: `Removing log: \`${id}\``});
 					

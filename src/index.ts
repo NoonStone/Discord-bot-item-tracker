@@ -4,6 +4,7 @@ import 'dotenv/config';
 import {generateId, getMaterialList} from './lib/materials.ts';
 import {transferFileRemote} from './lib/transferConfig.ts';
 import {commandManager} from './lib/commandManager.ts';
+import {motionCommandLib} from "./lib/motionCommandLib.ts";
 
 const client = new Client({
 	intents: [
@@ -19,7 +20,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 });
 
 
-// Checks for when a slash command is inputted
+// Checks for when a slash command is inputted //
 client.on(Events.InteractionCreate, async (interaction) => {
 
 	if (!interaction.isChatInputCommand()) return;
@@ -56,7 +57,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 		transferFileRemote();
 	}
-	
 	else if (interaction.commandName === 'removecollected') {
 		const id: string | null = interaction.options.getString('id');
 		
@@ -89,6 +89,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		}
 
 		transferFileRemote();
+	}
+	else if (interaction.commandName === motionCommandLib.motionCreateString) {
+		await motionCommandLib.motionCreateLogic(interaction);
 	}
 });
 

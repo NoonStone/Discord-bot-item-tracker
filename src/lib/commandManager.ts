@@ -2,13 +2,14 @@ import {REST, Routes} from "discord.js";
 import {collectedCommand} from "./collectedCommand.ts";
 import {configDotenv} from "dotenv";
 import {removeCollectedCommand} from "./removeCollectedCommand.ts";
+import {motionCommandLib} from "./motionCommandLib.ts";
 
 // Central location for all commands to be managed
 export function commandManager() {
 	configDotenv();
 
 	// Put all commands into this array
-	const commands = [collectedCommand(), removeCollectedCommand()];
+	const commands = [collectedCommand(), removeCollectedCommand(), motionCommandLib.commandJSON()];
 
 	// Writes commands to discord and sends confirmation into console.
 	const rest = new REST({version: '10'}).setToken(process.env.BOT_TOKEN!);

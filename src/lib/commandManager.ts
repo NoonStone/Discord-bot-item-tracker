@@ -9,7 +9,12 @@ export function commandManager() {
 	configDotenv();
 
 	// Put all commands into this array
-	const commands = [collectedCommand(), removeCollectedCommand(), motionCommandLib.commandJSON()];
+	const commands = [
+		collectedCommand(),
+		removeCollectedCommand(),
+		motionCommandLib.motionCreateJSON(),
+		motionCommandLib.motionProgressJSON()
+	];
 
 	// Writes commands to discord and sends confirmation into console.
 	const rest = new REST({version: '10'}).setToken(process.env.BOT_TOKEN!);

@@ -20,7 +20,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 });
 
 
-// Checks for when a slash command is inputted //
+// Checks for when a slash command is inputted
 client.on(Events.InteractionCreate, async (interaction) => {
 
 	if (!interaction.isChatInputCommand()) return;
@@ -56,28 +56,27 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		console.log('Items logged');
 
 		transferFileRemote();
-	}
-	else if (interaction.commandName === 'removecollected') {
+	} else if (interaction.commandName === 'removecollected') {
 		const id: string | null = interaction.options.getString('id');
-		
-		// Read file and turns the string into a multidimensional array 
+
+		// Read file and turns the string into a multidimensional array
 		const data = fs.readFileSync('log.csv', 'utf8');
 		const singleArraySplit = data.split('\n');
 		const multiArraySplit: string[][] = singleArraySplit.map(line => line.split(','));
 
 		let isIdFound = false;
 
-		// Searches through the first arrays, then through each string in the sub-array. 
+		// Searches through the first arrays, then through each string in the sub-array.
 		// Until it finds an entry that = the search input (in this case "id" but can be any string.)
 		for (const searchArray of multiArraySplit) {
 			const lineId = searchArray[4];
 			if (lineId === id) {
 				isIdFound = true;
 				const foundArray = multiArraySplit.indexOf(searchArray);
-				 multiArraySplit.splice(foundArray, 1);
+				multiArraySplit.splice(foundArray, 1);
 
 				interaction.reply({content: `Removing log: \`${id}\``});
-					
+
 				// Turns the string back into a multidimensional array. Then overwrites the log file with the new one.
 				const joinedArray: string = multiArraySplit.map(row => row.join(',')).join('\n');
 				fs.writeFileSync('log.csv', joinedArray);
@@ -89,9 +88,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		}
 
 		transferFileRemote();
-	}
-	else if (interaction.commandName === motionCommandLib.motionCreateString) {
+	} else if (interaction.commandName === motionCommandLib.motionCreateString) {
 		await motionCommandLib.motionCreateLogic(interaction);
+	} else if (interaction.commandName === motionCommandLib.motionProgressString) {
+		await motionCommandLib.motionProgressLogic(interaction);
 	}
 });
 

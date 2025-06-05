@@ -1,13 +1,14 @@
 import {generateId, getMaterialList, isValidDateString} from "./materials.ts";
+import type {ChatInputCommandInteraction} from 'discord.js';
 import {SlashCommandBuilder} from "discord.js";
-import type {ChatInputCommandInteraction } from 'discord.js';
 import fs from "fs";
+import {readFileLib} from "./readFile.ts";
 
 class motionCommand {
-	public motionCreateString: string  = 'createmotion';
-	public motionProgressString: string  = 'motionprogress';
+	public motionCreateString: string = 'createmotion';
+	public motionProgressString: string = 'motionprogress';
 
-	public commandJSON() {
+	public motionCreateJSON() {
 
 		const materialList: string[] = getMaterialList();
 
@@ -32,11 +33,11 @@ class motionCommand {
 	}
 
 	// Just in case we need this
-	public async fuckYou(interaction: ChatInputCommandInteraction ){
+	public async fuckYou(interaction: ChatInputCommandInteraction) {
 		await interaction.reply({content: 'Fuck you'});
 	}
 
-	public async motionCreateLogic(interaction: ChatInputCommandInteraction ){
+	public async motionCreateLogic(interaction: ChatInputCommandInteraction) {
 		const startDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 		const endDate = interaction.options.getString('end-date');
 		if (!isValidDateString(endDate)) {
@@ -76,6 +77,32 @@ class motionCommand {
 		console.log('Items logged');
 	}
 
+	public motionProgressJSON() {
+
+		const command = new SlashCommandBuilder()
+			.setName(this.motionProgressString)
+			.setDescription(`Find active motion (within date)`)
+			.addStringOption(option =>
+				option.setName('date')
+					.setDescription('Optional date in YYYY-MM-DD format')
+					.setRequired(false)
+			);
+
+		return command.toJSON();
+	}
+
+	public async motionProgressLogic(interaction: ChatInputCommandInteraction) {
+		const motionList = readFileLib.getMotionList();
+		let printMsg = '';
+		motionList.forEach((motion) => {
+			printMsg += `# MOTION ${motion.startDate} - ${motion.endDate}\n-# id: ${motion.id}\n`;
+			motion.itemGoals.forEach((goal) => {
+				printMsg += `- ${goal.item}: ${goal.amount}/XXX\n`;
+			});
+		});
+		interaction.reply({content: `${printMsg}`});
+	}
 }
+
 
 export const motionCommandLib = new motionCommand();

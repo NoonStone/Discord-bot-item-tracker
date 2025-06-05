@@ -2,15 +2,16 @@ import {Client, Events, GatewayIntentBits} from 'discord.js';
 import * as fs from 'fs';
 import 'dotenv/config';
 import {generateId, getMaterialList} from './lib/materials.ts';
-import {transferFileRemote} from './lib/transferConfig.ts';
+// import {transferFileRemote} from './lib/transferConfig.ts';
 import {commandManager} from './lib/commandManager.ts';
 import {motionCommandLib} from "./lib/motionCommandLib.ts";
+import { motionLogic } from './logic/motionLogic.ts';
 
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
+		// GatewayIntentBits.MessageContent,
 	],
 });
 
@@ -55,7 +56,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		await interaction.reply({content: printLogSummary});
 		console.log('Items logged');
 
-		transferFileRemote();
+		// transferFileRemote();
 	}
 	else if (interaction.commandName === 'removecollected') {
 		const id: string | null = interaction.options.getString('id');
@@ -88,10 +89,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			interaction.reply({content: `ID \`${id}\` does not exist :/`});
 		}
 
-		transferFileRemote();
+		// transferFileRemote();
 	}
-	else if (interaction.commandName === motionCommandLib.motionCreateString) {
+	else if (interaction.commandName === 'motionprogress') {
 		await motionCommandLib.motionCreateLogic(interaction);
+		motionLogic();
+		// const motionOutput = motionLogic();
+		// interaction.reply({content: motionOutput});
 	}
 });
 

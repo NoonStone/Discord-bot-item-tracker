@@ -31,6 +31,14 @@ class motionCommand {
 		return command.toJSON();
 	}
 
+	public command2JSON() {
+
+		const command2 = new SlashCommandBuilder()
+			.setName(this.motionProgressString)
+			.setDescription('List the current active motion');
+		return command2.toJSON();
+	}
+
 	// Just in case we need this
 	public async fuckYou(interaction: ChatInputCommandInteraction ){
 		await interaction.reply({content: 'Fuck you'});

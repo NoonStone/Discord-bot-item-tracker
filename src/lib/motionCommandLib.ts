@@ -55,7 +55,7 @@ class motionCommand {
 		const roles = interaction.member.roles.cache;
 		const isSecretary = roles.has('1198349367791321119');
 		const isRegent = roles.has('1238607758400426035');
-		const isDev = (player === 'wage_me' || player === 'NoonStone');
+		const isDev = (player === 'wage_me' || player === 'noonstone');
 		if (!isSecretary && !isRegent && !isDev) {
 			interaction.reply({
 				content: 'You are not authorized to create a motion.\nContact the Regent or Secretary of the federation if you wish to start a production motion.',
@@ -108,10 +108,11 @@ class motionCommand {
 				flags: MessageFlags.Ephemeral
 			});
 		}
-
-		// Writes the discord confirmation message into the chat where the slash command was put into
-		await interaction.reply({content: printLogSummary});
-		console.log('Items logged');
+		if (isItemFlag) {
+			// Writes confirmation into console that command was executed succesfully
+			await interaction.reply({content: printLogSummary});
+			console.log('Motion Created');
+		}
 	}
 
 	public motionProgressJSON() {

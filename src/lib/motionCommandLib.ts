@@ -1,20 +1,18 @@
 import {generateId, getMaterialList, isValidDateString} from "./materials.ts";
-import type {ChatInputCommandInteraction} from 'discord.js';
-import {SlashCommandBuilder} from "discord.js";
+import {type ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder} from 'discord.js';
 import fs from "fs";
-import {MessageFlags} from 'discord.js';
 
 type itemRecord = {
-	item: string,
-	amount: number,
+    item: string,
+    amount: number,
 }
 
 type Motion = {
-	id: string,
-	startDate: string,
-	endDate: string,
-	itemGoals: itemRecord[],
-	itemsCollected: itemRecord[],
+    id: string,
+    startDate: string,
+    endDate: string,
+    itemGoals: itemRecord[],
+    itemsCollected: itemRecord[],
 }
 
 class motionCommand {
@@ -51,38 +49,64 @@ class motionCommand {
 	}
 
 	public async motionCreateLogic(interaction: ChatInputCommandInteraction) {
+		const player = interaction.user.username;
+
+		if (!interaction.member || !('roles' in interaction.member) || Array.isArray(interaction.member.roles)) return;
+		const roles = interaction.member.roles.cache;
+		const isSecretary = roles.has('1198349367791321119');
+		const isRegent = roles.has('1238607758400426035');
+		const isDev = (player === 'wage_me' || player === 'NoonStone');
+		if (!isSecretary && !isRegent && !isDev) {
+			interaction.reply({
+				content: 'You are not authorized to create a motion.\nContact the Regent or Secretary of the federation if you wish to start a production motion.',
+				flags: MessageFlags.Ephemeral
+			});
+			return;
+		}
+
 		const startDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 		const endDate = interaction.options.getString('end-date');
 		if (!isValidDateString(endDate)) {
-			await interaction.reply({content: `${endDate} is not a valid date format.\nMake sure it's in a YYYY-MM-DD format`});
+			await interaction.reply({
+				content: `${endDate} is not a valid date format.\nMake sure it's in a YYYY-MM-DD format.`,
+				flags: MessageFlags.Ephemeral
+			});
 			return;
 		}
 		if (startDate == null || endDate == null) return;
 		if (Date.parse(startDate) > Date.parse(endDate)) {
-			await interaction.reply({content: `${endDate} is a past date, try a date in the future :^)`});
+			await interaction.reply({
+				content: `${endDate} is a past date, try a date in the future. :^)`,
+				flags: MessageFlags.Ephemeral
+			});
 			return;
-		}
 
-		const player = interaction.user.username;
+		}
 		const materialList: string[] = getMaterialList();
 		const csvFile = 'motions.csv';
 		const id = generateId();
 
-		let printLogSummary = `${player} logged:\n-# Motion ID: \`${id}\`\n`;
+		let printLogSummary = `-# Motion ID: \`${id}\`\n# ***PRODUCTION MOTION*** \`(UNTIL ${endDate})\`\n`;
 		// Create csv file and header if missing
 		if (!fs.existsSync(csvFile)) {
 			fs.writeFileSync(csvFile, 'Start-Date,End-Date,Player,Item,Amount,ID\n');
 		}
 
-
+		let isItemFlag = false;
 		for (const material of materialList) {
 			const amount = interaction.options.getInteger(material);
 			if (!amount) continue;
-
+			isItemFlag = true;
 			const csvLine = `${startDate},${endDate},${player},${material},${amount},${id}\n`;
 			fs.appendFileSync(csvFile, csvLine);
 
 			printLogSummary += `- ${material}: ${amount}\n`;
+		}
+		if (!isItemFlag) {
+			await interaction.reply({
+				content: 'A production motion with no items, is not really a production motion. Is it?\nTry entering items to be collected next time.',
+				flags: MessageFlags.Ephemeral
+			});
 		}
 
 		// Writes the discord confirmation message into the chat where the slash command was put into
@@ -114,14 +138,17 @@ class motionCommand {
 				const goalProgress = motion.itemsCollected.find((itemRecord) => itemRecord.item == goal.item)?.amount ?? 0;
 				if (goalProgress >= goal.amount)
 					printMsg += `- **${goal.item}: ${goalProgress}/${goal.amount}** :white_check_mark:\n`;
-				else if (goalProgress >= goal.amount/2)
+				else if (goalProgress >= goal.amount / 2)
 					printMsg += `- ${goal.item}: ${goalProgress}/${goal.amount} :yellow_square: \n`;
 				else
 					printMsg += `- ${goal.item}: ${goalProgress}/${goal.amount}\n`;
 			});
 		});
 		if (printMsg == '') {
-			interaction.reply({content: `Sorry, but we could not find a message to print`, flags: MessageFlags.Ephemeral});
+			interaction.reply({
+				content: `Sorry, but we could not find a message to print`,
+				flags: MessageFlags.Ephemeral
+			});
 			return;
 		} else
 			interaction.reply({content: `${printMsg}`, flags: MessageFlags.Ephemeral});

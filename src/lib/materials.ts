@@ -31,3 +31,12 @@ export function isValidDateString(dateStr: string | null): boolean {
 	const date = new Date(dateStr);
 	return !isNaN(date.getTime()) && date.toISOString().startsWith(dateStr);
 }
+
+export function getSetPieces(): string[] {
+	return [
+		'helmet',
+		'chestplate',
+		'leggings',
+		'boots',
+	];
+}

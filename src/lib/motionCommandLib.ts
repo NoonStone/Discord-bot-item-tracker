@@ -1,4 +1,4 @@
-import {generateId, getMaterialList, isValidDateString} from "./materials.ts";
+import {generateId, getMaterialList, getSetPieces, isValidDateString} from "./materials.ts";
 import {type ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder} from 'discord.js';
 import fs from "fs";
 
@@ -165,7 +165,7 @@ class motionCommand {
 		singleArraySplit.forEach((line) => {
 			const record = line.split(',');
 			const id = record[5];
-			if (id === 'ID') return;
+			if (id === 'ID') return; // Don't read the header line
 			const startDate = record[0];
 			const endDate = record[1];
 
@@ -174,9 +174,7 @@ class motionCommand {
 
 			if (!id || !startDate || !endDate || !entry) return;
 
-
 			const isIdRegistered = motionList.some(motion => motion.id === record[5]);
-
 			if (!isIdRegistered) {
 				const tempMotion: Motion = {
 					id: id,
@@ -190,8 +188,17 @@ class motionCommand {
 
 			const motion = motionList.find(motion => motion.id === id);
 			if (!motion || !motion.itemGoals) return;
-			motion.itemGoals.push(entry);
 
+			// armour sets are now read as each individual armour piece
+			if (entry.item === 'sets') {
+				const amount = entry.amount;
+				getSetPieces().forEach((setPieceName) => {
+					this.addItemToGoals(motion, {item: setPieceName, amount: amount});
+				});
+				return;
+			}
+
+			this.addItemToGoals(motion, entry);
 		});
 
 		return motionList;
@@ -252,6 +259,15 @@ class motionCommand {
 		// Get the progress of all active emotions
 		activeMotions.map((motion) => this.getMotionProgress(motion));
 		return activeMotions;
+	}
+
+	// Add items to goals, and ensures there are no duplicate entries
+	addItemToGoals(motion: Motion, entry: itemRecord): void {
+		const itemInGoals = motion.itemGoals.find((goal) => goal.item === entry.item);
+		if (itemInGoals)
+			itemInGoals.amount += entry.amount;
+		else
+			motion.itemGoals.push(entry);
 	}
 }
 

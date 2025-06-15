@@ -193,12 +193,12 @@ class motionCommand {
 			if (entry.item === 'sets') {
 				const amount = entry.amount;
 				getSetPieces().forEach((setPieceName) => {
-					this.addItemToGoals(motion, {item: setPieceName, amount: amount});
+					this.addItemToItemList(motion.itemGoals, {item: setPieceName, amount: amount});
 				});
 				return;
 			}
 
-			this.addItemToGoals(motion, entry);
+			this.addItemToItemList(motion.itemGoals, entry);
 		});
 
 		return motionList;
@@ -220,21 +220,13 @@ class motionCommand {
 				if (!record[3]) return;
 				const itemName: string = record[2];
 				const itemAmount: number = parseInt(record[3]);
-
-				const isItemRegistered = itemList.some(item => item.item === itemName);
-
-				if (!isItemRegistered) {
-					const tempItem: itemRecord = {
-						item: itemName,
-						amount: itemAmount
-					};
-					itemList.push(tempItem);
-					return;
-				}
-
-				const registeredItem = itemList.find(item => item.item === itemName);
-				if (!registeredItem) return;
-				registeredItem.amount += itemAmount;
+				
+				if (itemName === 'sets') {
+					getSetPieces().forEach((setPieceName) => {
+						this.addItemToItemList(itemList, {item: setPieceName, amount: itemAmount});
+					});
+				} else
+					this.addItemToItemList(itemList, {item: itemName, amount: itemAmount});
 			}
 		});
 
@@ -245,7 +237,7 @@ class motionCommand {
 	public getMotionProgress(motion: Motion): Motion {
 		const collectedList = this.getCollectedAtDates(motion.startDate, motion.endDate);
 
-		// remove items in collectedList that aren't relevant and add to itemsCollected
+		// remove items in collectedList that aren't in goals and add to itemsCollected
 		const goalsSet = new Set(motion.itemGoals.map(item => item.item));
 		motion.itemsCollected = collectedList.filter(item => goalsSet.has(item.item));
 
@@ -262,12 +254,12 @@ class motionCommand {
 	}
 
 	// Add items to goals, and ensures there are no duplicate entries
-	addItemToGoals(motion: Motion, entry: itemRecord): void {
-		const itemInGoals = motion.itemGoals.find((goal) => goal.item === entry.item);
-		if (itemInGoals)
-			itemInGoals.amount += entry.amount;
+	addItemToItemList(itemList: itemRecord[], entry: itemRecord): void {
+		const itemInList = itemList.find((goal) => goal.item === entry.item);
+		if (itemInList)
+			itemInList.amount += entry.amount;
 		else
-			motion.itemGoals.push(entry);
+			itemList.push(entry);
 	}
 }
 

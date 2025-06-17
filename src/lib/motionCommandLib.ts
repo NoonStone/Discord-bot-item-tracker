@@ -1,4 +1,4 @@
-import {generateId, getMaterialList, isValidDateString} from "./materials.ts";
+import {generateId, getMaterialList, getSetPieces, isValidDateString} from "./materials.ts";
 import {type ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder} from 'discord.js';
 import fs from "fs";
 
@@ -165,7 +165,7 @@ class motionCommand {
 		singleArraySplit.forEach((line) => {
 			const record = line.split(',');
 			const id = record[5];
-			if (id === 'ID') return;
+			if (id === 'ID') return; // Don't read the header line
 			const startDate = record[0];
 			const endDate = record[1];
 
@@ -174,9 +174,7 @@ class motionCommand {
 
 			if (!id || !startDate || !endDate || !entry) return;
 
-
 			const isIdRegistered = motionList.some(motion => motion.id === record[5]);
-
 			if (!isIdRegistered) {
 				const tempMotion: Motion = {
 					id: id,
@@ -190,8 +188,17 @@ class motionCommand {
 
 			const motion = motionList.find(motion => motion.id === id);
 			if (!motion || !motion.itemGoals) return;
-			motion.itemGoals.push(entry);
 
+			// armour sets are now read as each individual armour piece
+			if (entry.item === 'sets') {
+				const amount = entry.amount;
+				getSetPieces().forEach((setPieceName) => {
+					this.addItemToItemList(motion.itemGoals, {item: setPieceName, amount: amount});
+				});
+				return;
+			}
+
+			this.addItemToItemList(motion.itemGoals, entry);
 		});
 
 		return motionList;
@@ -213,21 +220,13 @@ class motionCommand {
 				if (!record[3]) return;
 				const itemName: string = record[2];
 				const itemAmount: number = parseInt(record[3]);
-
-				const isItemRegistered = itemList.some(item => item.item === itemName);
-
-				if (!isItemRegistered) {
-					const tempItem: itemRecord = {
-						item: itemName,
-						amount: itemAmount
-					};
-					itemList.push(tempItem);
-					return;
-				}
-
-				const registeredItem = itemList.find(item => item.item === itemName);
-				if (!registeredItem) return;
-				registeredItem.amount += itemAmount;
+				
+				if (itemName === 'sets') {
+					getSetPieces().forEach((setPieceName) => {
+						this.addItemToItemList(itemList, {item: setPieceName, amount: itemAmount});
+					});
+				} else
+					this.addItemToItemList(itemList, {item: itemName, amount: itemAmount});
 			}
 		});
 
@@ -238,7 +237,7 @@ class motionCommand {
 	public getMotionProgress(motion: Motion): Motion {
 		const collectedList = this.getCollectedAtDates(motion.startDate, motion.endDate);
 
-		// remove items in collectedList that aren't relevant and add to itemsCollected
+		// remove items in collectedList that aren't in goals and add to itemsCollected
 		const goalsSet = new Set(motion.itemGoals.map(item => item.item));
 		motion.itemsCollected = collectedList.filter(item => goalsSet.has(item.item));
 
@@ -252,6 +251,15 @@ class motionCommand {
 		// Get the progress of all active emotions
 		activeMotions.map((motion) => this.getMotionProgress(motion));
 		return activeMotions;
+	}
+
+	// Add items to goals, and ensures there are no duplicate entries
+	addItemToItemList(itemList: itemRecord[], entry: itemRecord): void {
+		const itemInList = itemList.find((goal) => goal.item === entry.item);
+		if (itemInList)
+			itemInList.amount += entry.amount;
+		else
+			itemList.push(entry);
 	}
 }
 
